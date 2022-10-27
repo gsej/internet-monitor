@@ -1,0 +1,5 @@
+---
+- targets:
+    - http://www.google.com/;google.com
+    - https://polytunnel.gsej.co.uk/;polytunnel frontend
+    - https://api.polytunnel.gsej.co.uk/api/currenttemperatures;polytunnel api

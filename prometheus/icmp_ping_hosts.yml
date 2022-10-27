@@ -1,0 +1,5 @@
+---
+- targets:
+    - www.google.com;google.com
+    - polytunnel.gsej.co.uk;polytunnel
+    - 192.168.1.6;polytunnelAP
