@@ -1,4 +1,3 @@
----
 global:
   scrape_interval: 15s
   evaluation_interval: 15s
@@ -11,21 +10,14 @@ rule_files:
 
 scrape_configs:
 
-  - job_name: 'speedtest'
-    metrics_path: /metrics
-    scrape_interval: 60m
-    scrape_timeout: 60s  # running speedtest needs time to complete
-    static_configs:
-      - targets: ['speedtest:9798']
-
-  - job_name: 'ping'
+  - job_name: 'http'
     metrics_path: /probe
     scrape_interval: 5s
     params:
       module: [http_2xx]  # Look for a HTTP 200 response.
     file_sd_configs:
       - files:
-          - ping_hosts.yml
+          - http_hosts.yml
     relabel_configs:
       - source_labels: [__address__]
         regex: '(.*);(.*)'  # first is the url, thus unique for instance
@@ -38,16 +30,16 @@ scrape_configs:
       - source_labels: [instance]
         target_label: __param_target
       - target_label: __address__
-        replacement: ping:9115  # The blackbox exporter's real hostname:port.
+        replacement: blackbox:9115  # The blackbox exporter's real hostname:port.
 
-  - job_name: 'icmp_ping'
+  - job_name: 'icmp'
     metrics_path: /probe
     scrape_interval: 5s
     params:
       module: [icmp]  # Look for an ICMP response.
     file_sd_configs:
       - files:
-          - icmp_ping_hosts.yml
+          - icmp_hosts.yml
     relabel_configs:
       - source_labels: [__address__]
         regex: '(.*);(.*)'  # first is the url, thus unique for instance
@@ -60,8 +52,4 @@ scrape_configs:
       - source_labels: [instance]
         target_label: __param_target
       - target_label: __address__                                               
-        replacement: ping:9115  # The blackbox exporter's real hostname:port.
-
-  - job_name: 'node'
-    static_configs:
-      - targets: ['nodeep:9100']
+        replacement: blackbox:9115  # The blackbox exporter's real hostname:port.

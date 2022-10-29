@@ -1,0 +1,5 @@
+---
+- targets:
+    - www.google.com;www.google.com
+    - 192.168.1.21;192.168.1.21-PolyTunnelPI_________________________________
+    - 192.168.1.6;192.168.1.6-PolytunnelAP

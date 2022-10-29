@@ -1,5 +1,3 @@
-# Ansible managed
----
 version: "3.5"
 
 volumes:
@@ -29,8 +27,7 @@ services:
     ports:
       - 9090:9090
     links:
-      - ping:ping
-      - speedtest:speedtest
+      - blackbox:blackbox
     networks:
       - back-tier
 
@@ -50,7 +47,7 @@ services:
       - back-tier
       - front-tier
 
-  ping:
+  blackbox:
     tty: true
     stdin_open: true
     expose:
@@ -66,30 +63,30 @@ services:
     networks:
       - back-tier
 
-  speedtest:
-    expose:
-      - 9798
-    ports:
-      - 9798:9798
-    image: miguelndecarvalho/speedtest-exporter
-    restart: always
-    networks:
-      - back-tier
+  # speedtest:
+  #   expose:
+  #     - 9798
+  #   ports:
+  #     - 9798:9798
+  #   image: miguelndecarvalho/speedtest-exporter
+  #   restart: always
+  #   networks:
+  #     - back-tier
 
-  nodeexp:
-    privileged: true
-    image: prom/node-exporter
-    volumes:
-      - /proc:/host/proc:ro
-      - /sys:/host/sys:ro
-      - /:/rootfs:ro
-    ports:
-      - 9100:9100
-    restart: always
-    command:
-      - '--path.procfs=/host/proc'
-      - '--path.sysfs=/host/sys'
-      - --collector.filesystem.ignored-mount-points
-      - "^/(sys|proc|dev|host|etc|rootfs/var/lib/docker/containers|rootfs/var/lib/docker/overlay2|rootfs/run/docker/netns|rootfs/var/lib/docker/aufs)($$|/)"
-    networks:
-      - back-tier
+  # nodeexp:
+  #   privileged: true
+  #   image: prom/node-exporter
+  #   volumes:
+  #     - /proc:/host/proc:ro
+  #     - /sys:/host/sys:ro
+  #     - /:/rootfs:ro
+  #   ports:
+  #     - 9100:9100
+  #   restart: always
+  #   command:
+  #     - '--path.procfs=/host/proc'
+  #     - '--path.sysfs=/host/sys'
+  #     - --collector.filesystem.ignored-mount-points
+  #     - "^/(sys|proc|dev|host|etc|rootfs/var/lib/docker/containers|rootfs/var/lib/docker/overlay2|rootfs/run/docker/netns|rootfs/var/lib/docker/aufs)($$|/)"
+  #   networks:
+  #     - back-tier
