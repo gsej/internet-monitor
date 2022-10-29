@@ -1,121 +1,24 @@
-# Internet Pi
+# Internet Monitor
 
-[![CI](https://github.com/geerlingguy/internet-pi/workflows/CI/badge.svg?event=push)](https://github.com/geerlingguy/internet-pi/actions?query=workflow%3ACI)
+Installs Prometheus and Grafana, to monitor http servers. 
 
-**A Raspberry Pi Configuration for Internet connectivity**
+## Pre-requisites
 
-I have had a couple Pis doing random Internet-related duties for years. It's finally time to formalize their configs and make all the DNS/ad-blocking/monitoring stuff encapsulated into one Ansible project.
+Make sure Docker and [Docker Compose](https://docs.docker.com/compose/install/) are installed on your Docker host machine.
+## Running
 
-So that's what this is.
+Start with 
 
-## Features
+`docker-compose up --detach`
 
-**Internet Monitoring**: Installs Prometheus and Grafana, along with a few Docker containers to monitor your Internet connection with Speedtest.net speedtests and HTTP tests so you can see uptime, ping stats, and speedtest results over time.
+## Interesting urls
 
-![Internet Monitoring Dashboard in Grafana](/images/internet-monitoring.png)
+http://localhost:3030 graphana front end
 
-Other features:
+Username is `admin` and default password is also `admin`.
 
-**IMPORTANT NOTE**: If you use the included Internet monitoring, it will download a decently-large amount of data through your Internet connection on a daily basis. Don't use it, or tune the `internet-monitoring` setup to not run the speedtests as often, if you have a metered connection!
+http://localhost:9090/targets shows status of monitored targets as seen from prometheus - in this case which hosts being monitored.
 
-## Recommended Pi and OS
+http://localhost:9090/graph?g0.expr=probe_http_status_code&g0.tab=1 shows prometheus value for `probe_http_status_code` for each host. You can edit/play with additional values. Useful to check everything is okey in prometheus (in case Grafana is not showing the data you expect).
 
-You should use a Raspberry Pi 4 model B or better. The Pi 4 and later generations of Pi include a full gigabit network interface and enough I/O to reliably measure fast Internet connections.
-
-Older Pis work, but have many limitations, like a slower CPU and sometimes very-slow NICs that limit the speed test capability to 100 Mbps or 300 Mbps on the Pi 3 model B+.
-
-Other computers and VMs may run this configuration as well, but it is only regularly tested on a Raspberry Pi.
-
-The configuration is tested against Raspberry Pi OS, both 64-bit and 32-bit, and runs great on that or a generic Debian installation.
-
-It should also work with Ubuntu for Pi, or Arch Linux, but has not been tested on other operating systems.
-
-## Setup
-
-  1. [Install Ansible](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html). The easiest way (especially on Pi or a Debian system) is via Pip:
-     1. (If on Pi/Debian): `sudo apt-get install -y python3-pip`
-     2. (Everywhere): `pip3 install ansible`
-  2. Clone this repository: `git clone https://github.com/geerlingguy/internet-pi.git`, then enter the repository directory: `cd internet-pi`.
-  3. Install requirements: `ansible-galaxy collection install -r requirements.yml` (if you see `ansible-galaxy: command not found`, restart your SSH session or reboot the Pi and try again)
-  4. Make copies of the following files and customize them to your liking:
-     - `example.inventory.ini` to `inventory.ini` (replace IP address with your Pi's IP, or comment that line and uncomment the `connection=local` line if you're running it on the Pi you're setting up).
-     - `example.config.yml` to `config.yml`
-  5. Run the playbook: `ansible-playbook main.yml`
-
-> **If running locally on the Pi**: You may encounter an error like "Error while fetching server API version". If you do, please either reboot or log out and log back in, then run the playbook again.
-
-## Usage
-
-### Grafana
-
-Visit the Pi's IP address with port 3030 (e.g. http://192.168.1.10:3030/), and log in with username `admin` and the password `monitoring_grafana_admin_password` you configured in your `config.yml`.
-
-To find the dashboard, navigate to Dashboards, click Browse, then go to the Internet connection dashboard. If you star this dashboard, it will appear on the Grafana home page.
-
-> Note: The `monitoring_grafana_admin_password` is only used the first time Grafana starts up; if you need to change it later, do it via Grafana's admin UI.
-
-### Prometheus
-
-A number of default Prometheus job configurations are included out of the box, but if you would like to add more to the `prometheus.yml` file, you can add a block of text that will be added to the end of the `scrape_configs` using the `prometheus_extra_scrape_configs` variable, for example:
-
-```yaml
-prometheus_extra_scrape_configs: |
-  - job_name: 'customjob'
-    scrape_interval: 5s
-    static_configs:
-      - targets: ['192.168.1.1:9100']
-```
-
-You can also add more targets to monitor via the node exporter dashboard, say if you have a number of servers or other Pis you want to monitor on this instance. Just add them to the list, after the `nodeexp:9100` entry for the main Pi:
-
-```yaml
-prometheus_node_exporter_targets:
-  - 'nodeexp:9100'
-  # Add more targets here
-  - 'another-server.local:9100'
-```
-
-## Updating
-
-### Configurations and internet-monitoring images
-
-Upgrades for the other configurations are similar (go into the directory, and run the same `docker-compose` commands. Make sure to `cd` into the `config_dir` that you use in your `config.yml` file. 
-
-Alternatively, you may update the initial `config.yml` in the the repo folder and re-run the main playbook: `ansible-playbook main.yml`. At some point in the future, a dedicated upgrade playbook may be added, but for now, upgrades may be performed manually as shown above.
-
-## Backups
-
-A guide for backing up the configurations and historical data will be posted here as part of [Issue #194: Create Backup guide](https://github.com/geerlingguy/internet-pi/issues/194).
-
-## Uninstall
-
-To remove `internet-pi` from your system, run the following commands (assuming the default install location of `~`, your home directory):
-
-```bash
-# Enter the internet-monitoring directory.
-cd ~/internet-monitoring
-
-# Shut down internet-monitoring containers and delete data volumes.
-docker-compose down -v
-
-# Delete all the unused container images, volumes, etc. from the system.
-docker system prune -f
-```
-
-You can then delete the `internet-monitoring`, etc. folders and everything will be gone from your system.
-
-## License
-
-MIT
-
-## Author
-
-This project was created in 2021 by [Jeff Geerling](https://www.jeffgeerling.com/).
-
-
-
-## Notes:
-
-sudo pip3 install -U "bcrypt<4.0.0
-
-for bcrypt error
+http://localhost:9115 blackbox exporter endpoint. Lets you see what have failed/succeded.
